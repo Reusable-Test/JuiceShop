@@ -11,11 +11,17 @@ import { UserModel } from '../models/user'
 import * as utils from '../lib/utils'
 const security = require('../lib/insecurity')
 const request = require('request')
+const { URL } = require('url')
 
 module.exports = function profileImageUrlUpload () {
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.body.imageUrl !== undefined) {
       const url = req.body.imageUrl
+      const allowedDomains = ['example.com', 'another-example.com']; // Add allowed domains here
+      const urlObj = new URL(url);
+      if (!allowedDomains.includes(urlObj.hostname)) {
+        return next(new Error('Blocked illegal activity by ' + req.socket.remoteAddress));
+      }
       if (url.match(/(.)*solve\/challenges\/server-side(.)*/) !== null) req.app.locals.abused_ssrf_bug = true
       const loggedInUser = security.authenticatedUsers.get(req.cookies.token)
       if (loggedInUser) {
