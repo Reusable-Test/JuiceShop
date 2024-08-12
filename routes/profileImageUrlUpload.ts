@@ -18,7 +18,12 @@ module.exports = function profileImageUrlUpload () {
     if (req.body.imageUrl !== undefined) {
       const url = req.body.imageUrl
       const allowedDomains = ['example.com', 'another-example.com']; // Add allowed domains here
-      const urlObj = new URL(url);
+      let urlObj;
+      try {
+        urlObj = new URL(url);
+      } catch (err) {
+        return next(new Error('Invalid URL provided'));
+      }
       if (!allowedDomains.includes(urlObj.hostname)) {
         return next(new Error('Blocked illegal activity by ' + req.socket.remoteAddress));
       }
